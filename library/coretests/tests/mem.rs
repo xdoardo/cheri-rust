@@ -25,10 +25,19 @@ fn size_of_16() {
 
 #[test]
 #[cfg(target_pointer_width = "32")]
-#[cfg_attr(target_abi = "cheriot", ignore)] // FIXME(cheri/triage): pointer width
 fn size_of_32() {
     assert_eq!(size_of::<usize>(), 4);
-    assert_eq!(size_of::<*const usize>(), 4);
+    // On CHERIoT and other CHERI platforms, the size and alignment
+    // of `usize` are not the same as those of `*const T`.
+    #[cfg(target_family = "cheriot")]
+    {
+        assert_eq!(size_of::<*const usize>(), 8);
+    }
+
+    #[cfg(not(target_family = "cheriot"))]
+    {
+        assert_eq!(size_of::<*const usize>(), 4);
+    }
 }
 
 #[test]
@@ -62,10 +71,20 @@ fn align_of_16() {
 
 #[test]
 #[cfg(target_pointer_width = "32")]
-#[cfg_attr(target_abi = "cheriot", ignore)] // FIXME(cheri/triage): pointer width
 fn align_of_32() {
     assert_eq!(align_of::<usize>(), 4);
-    assert_eq!(align_of::<*const usize>(), 4);
+
+    // On CHERIoT and other CHERI platforms, the size and alignment
+    // of `usize` are not the same as those of `*const T`.
+    #[cfg(target_family = "cheriot")]
+    {
+        assert_eq!(align_of::<*const usize>(), 8);
+    }
+
+    #[cfg(not(target_family = "cheriot"))]
+    {
+        assert_eq!(align_of::<*const usize>(), 4);
+    }
 }
 
 #[test]
